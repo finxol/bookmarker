@@ -108,6 +108,10 @@ const protectedRoutes = new Hono<Variables>()
             await next()
         }),
     )
+    .get("/auth/me", async (ctx) => {
+        const user = ctx.get("user")
+        return await Promise.resolve(ctx.json(user))
+    })
     .route("/bookmarks", bookmarks)
 
 const app = new Hono<Variables>()
