@@ -81,11 +81,23 @@ const app = new Hono<Variables>()
         const parsedPage = parse(page)
 
         const title = parsedPage.querySelector("title")?.textContent ||
+            parsedPage.querySelector("meta[property='og:title']")?.getAttribute(
+                "content",
+            ) ||
+            parsedPage.querySelector("meta[property='twitter:title']")
+                ?.getAttribute(
+                    "content",
+                ) ||
             cleanUrl
         const description =
             parsedPage.querySelector("meta[name='description']")?.getAttribute(
                 "content",
-            ) || ""
+            ) ||
+            parsedPage.querySelector("meta[property='og:description']")
+                ?.getAttribute("content") ||
+            parsedPage.querySelector("meta[name='twitter:description']")
+                ?.getAttribute("content") ||
+            ""
 
         console.log(title, description)
 
