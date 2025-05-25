@@ -1,0 +1,8 @@
+{
+    "name": "@bookmarker/extension",
+    "version": "0.1.0",
+    "exports": {},
+    "imports": {
+        "@/": "./src/"
+    }
+}

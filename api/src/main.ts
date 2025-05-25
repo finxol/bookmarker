@@ -16,7 +16,6 @@ const unprotectedRoutes = new Hono()
     .get("/", async (ctx) => {
         return await Promise.resolve(ctx.json({
             message: "Hello World!",
-            //@ts-expect-error: denoJson.version is defined
             version: denoJson.version,
         }))
     })
