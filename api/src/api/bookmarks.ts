@@ -3,7 +3,8 @@ import { kv } from "@/utils/kv.ts"
 import { URLSchema } from "@/utils/bookmarks.ts"
 import { TidyURL } from "tidy-url"
 import { encodeHex } from "@std/encoding/hex"
-import { Variables } from "../globals.ts"
+import { parse } from "node-html-parser"
+import type { Variables } from "../globals.ts"
 import { getUserSub } from "../utils/auth.ts"
 
 const app = new Hono<Variables>()
@@ -76,7 +77,24 @@ const app = new Hono<Variables>()
         const hashBuffer = await crypto.subtle.digest("SHA-256", data)
         const id = encodeHex(hashBuffer)
 
-        await kv.set(["bookmarks", subject.id, id], cleanUrl)
+        const page = await fetch(cleanUrl).then((response) => response.text())
+        const parsedPage = parse(page)
+
+        const title = parsedPage.querySelector("title")?.textContent ||
+            cleanUrl
+        const description =
+            parsedPage.querySelector("meta[name='description']")?.getAttribute(
+                "content",
+            ) || ""
+
+        console.log(title, description)
+
+        await kv.set(["bookmarks", subject.id, id], {
+            title,
+            description,
+            url: cleanUrl,
+            updatedAt: new Date().toISOString(),
+        })
 
         return c.json({ id })
     })

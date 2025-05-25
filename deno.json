@@ -4,6 +4,7 @@
         "@openauthjs/openauth": "npm:@openauthjs/openauth@^0.4.3",
         "@std/encoding": "jsr:@std/encoding@^1.0.10",
         "hono": "jsr:@hono/hono@^4.7.10",
+        "node-html-parser": "npm:node-html-parser@^7.0.1",
         "tidy-url": "npm:tidy-url@^1.18.3",
         "zod": "npm:zod@^3.25.28"
     },
