@@ -3,13 +3,23 @@ import { kv } from "@/utils/kv.ts"
 import { URLSchema } from "@/utils/bookmarks.ts"
 import { TidyURL } from "tidy-url"
 import { encodeHex } from "@std/encoding/hex"
+import { Variables } from "../globals.ts"
+import { getUserSub } from "../utils/auth.ts"
 
-const app = new Hono()
-    .get("/", (c) => {
-        return c.text("Hello Hono!")
-    })
+const app = new Hono<Variables>()
     .delete("/all", async (c) => {
-        const it = kv.list({ prefix: ["bookmarks"] })
+        const subject = getUserSub(c)
+
+        if (!subject) {
+            return c.json(
+                {
+                    message: "User subject missing in context",
+                },
+                500,
+            )
+        }
+
+        const it = kv.list({ prefix: ["bookmarks", subject.id] })
 
         for await (const item of it) {
             await kv.delete(item.key)
@@ -17,7 +27,18 @@ const app = new Hono()
         return c.json({ message: "Bookmarks deleted" })
     })
     .get("/all", async (c) => {
-        const it = kv.list({ prefix: ["bookmarks"] })
+        const subject = getUserSub(c)
+
+        if (!subject) {
+            return c.json(
+                {
+                    message: "User subject missing in context",
+                },
+                500,
+            )
+        }
+
+        const it = kv.list({ prefix: ["bookmarks", subject.id] })
 
         const bookmarks = []
         for await (const item of it) {
@@ -27,6 +48,17 @@ const app = new Hono()
         return c.json(bookmarks)
     })
     .post("/add", async (c) => {
+        const subject = getUserSub(c)
+
+        if (!subject) {
+            return c.json(
+                {
+                    message: "User subject missing in context",
+                },
+                500,
+            )
+        }
+
         const url = c.req.query("url")
         if (!url) {
             return c.json({ error: "Missing URL parameter" }, 400)
@@ -44,7 +76,7 @@ const app = new Hono()
         const hashBuffer = await crypto.subtle.digest("SHA-256", data)
         const id = encodeHex(hashBuffer)
 
-        await kv.set(["bookmarks", id], cleanUrl)
+        await kv.set(["bookmarks", subject.id, id], cleanUrl)
 
         return c.json({ id })
     })
