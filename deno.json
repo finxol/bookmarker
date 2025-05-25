@@ -1,0 +1,28 @@
+{
+    "imports": {
+        "@/": "./src/",
+        "@std/encoding": "jsr:@std/encoding@^1.0.10",
+        "hono": "jsr:@hono/hono@^4.7.10",
+        "tidy-url": "npm:tidy-url@^1.18.3",
+        "zod": "npm:zod@^3.25.28"
+    },
+    "tasks": {
+        "dev": "deno run --watch --allow-net src/main.ts",
+        "start": "deno run --allow-net src/main.ts"
+    },
+    "fmt": {
+        "useTabs": false,
+        "lineWidth": 80,
+        "indentWidth": 4,
+        "semiColons": false,
+        "singleQuote": false,
+        "proseWrap": "preserve",
+        "include": ["src/"],
+        "exclude": ["src/testdata/", "src/fixtures/**/*.ts"]
+    },
+    "unstable": ["kv"],
+    "compilerOptions": {
+        "jsx": "precompile",
+        "jsxImportSource": "hono/jsx"
+    }
+}
