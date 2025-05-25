@@ -1,8 +1,8 @@
 {
-    "name": "@bookmarker/extension",
-    "version": "0.1.0",
+    "name": "@bookmarker/firefox-extension",
+    "version": "1.0.0",
+    "description": "Firefox extension for bookmarker.finxol.io",
     "exports": {},
-    "imports": {
-        "@/": "./src/"
-    }
+    "type": "extension",
+    "files": ["manifest.json", "popup.html", "popup.css", "popup.js", "icons/"]
 }

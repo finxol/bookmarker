@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bookmarker</title>
+        <link rel="stylesheet" href="popup.css" />
+    </head>
+    <body>
+        <div class="container">
+            <div id="loading" class="section">
+                <p>Checking authentication...</p>
+            </div>
+
+            <div id="auth-required" class="section hidden">
+                <h3>Authentication Required</h3>
+                <p>Please log in to bookmark pages</p>
+                <button id="login-btn" class="btn btn-primary">
+                    Login to Bookmarker
+                </button>
+            </div>
+
+            <div id="authenticated" class="section hidden">
+                <h3>Bookmarker</h3>
+                <div id="current-url" class="url-display"></div>
+                <button id="bookmark-btn" class="btn btn-success">
+                    Bookmark This Page
+                </button>
+                <a
+                    href="https://bookmarker.finxol.io/bookmarks/all"
+                    id="bookmark-btn"
+                    class="btn btn-success"
+                    >See all bookmarks</a
+                >
+                <div id="status" class="status"></div>
+            </div>
+        </div>
+
+        <script src="popup.js"></script>
+    </body>
+</html>
