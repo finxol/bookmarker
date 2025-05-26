@@ -122,23 +122,23 @@ const unprotectedRoutes = new Hono()
             return ctx.json(exchanged.err, 400)
         }
 
-        // Handle mobile app authentication
+        const next = redirectUri ? new URL(redirectUri) : new URL('/home', url.origin)
+
         if (isMobile && redirectUri) {
             // For mobile apps, redirect to the app with tokens as query parameters
-            const mobileUrl = new URL(redirectUri)
-            mobileUrl.searchParams.set('access_token', exchanged.tokens.accessToken)
-            mobileUrl.searchParams.set('refresh_token', exchanged.tokens.refreshToken || '')
+            next.searchParams.set('access_token', exchanged.tokens.access)
+            if (exchanged.tokens.refresh) {
+                next.searchParams.set('refresh_token', exchanged.tokens.refresh)
+            }
             if (exchanged.tokens.expiresIn) {
-                mobileUrl.searchParams.set('expires_in', exchanged.tokens.expiresIn.toString())
+                next.searchParams.set('expires_in', exchanged.tokens.expiresIn.toString())
             }
 
-            console.log('Redirecting mobile app to:', mobileUrl.toString())
-            return ctx.redirect(mobileUrl.toString(), 302)
+            console.log('Redirecting mobile app to:', next.toString())
         }
 
-        // Handle web authentication (existing flow)
         setTokens(ctx, exchanged.tokens)
-        return ctx.redirect(redirectUri || new URL('/home', url.origin).toString(), 302)
+        return ctx.redirect(next.toString(), 302)
     })
 
 const protectedRoutes = new Hono<Variables>()
