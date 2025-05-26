@@ -5,24 +5,30 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie"
 import { user, type UserSubject } from "./globals.ts"
 import { isCI } from "std-env"
 
-const clientID = Deno.env.get("AUTH_CLIENT_ID")!
-const issuerUrl = Deno.env.get("AUTH_ISSUER_URL")!
+const clientID = Deno.env.get("AUTH_CLIENT_ID")
+const issuerUrl = Deno.env.get("AUTH_ISSUER_URL")
 
 export const subjects = createSubjects({
     user,
 })
 
-if (!isCI && !clientID) {
+const defaultClientID = isCI ? "build-time" : undefined
+const defaultIssuerUrl = isCI ? "http://build.time" : undefined
+
+const finalClientID = clientID || defaultClientID
+const finalIssuerUrl = issuerUrl || defaultIssuerUrl
+
+if (!finalClientID) {
     throw new Error("AUTH_CLIENT_ID environment variable is not set")
 }
 
-if (!isCI && !issuerUrl) {
+if (!finalIssuerUrl) {
     throw new Error("AUTH_ISSUER_URL environment variable is not set")
 }
 
 export const client = createClient({
-    clientID,
-    issuer: issuerUrl,
+    clientID: finalClientID,
+    issuer: finalIssuerUrl,
 })
 
 export function setTokens(ctx: Context, tokens: Tokens) {
