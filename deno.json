@@ -1,13 +1,35 @@
 {
-    "workspace": ["./api", "./extension"],
+    "tasks": {
+        "check": "deno fmt --check . && deno lint . && deno check **/*.ts && deno check **/*.tsx",
+        "dev": "deno run --env-file -A --watch=static/,routes/ dev.ts",
+        "build": "deno run --env-file -A dev.ts build",
+        "start": "deno run --env-file -A main.ts",
+        "update": "deno run -A -r jsr:@fresh/update ."
+    },
+    "lint": {
+        "rules": {
+            "tags": ["fresh", "recommended"]
+        }
+    },
+    "exclude": ["**/_fresh/*"],
     "imports": {
-        "@openauthjs/openauth": "npm:@openauthjs/openauth@^0.4.3",
+        "@/": "./",
         "@std/encoding": "jsr:@std/encoding@^1.0.10",
         "hono": "jsr:@hono/hono@^4.7.10",
         "node-html-parser": "npm:node-html-parser@^7.0.1",
+        "ofetch": "npm:ofetch@^1.4.1",
         "tidy-url": "npm:tidy-url@^1.18.3",
-        "zod": "npm:zod@^3.25.28"
+        "zod": "npm:zod@^3.25.28",
+        "@std/http": "jsr:@std/http@^1.0.16",
+        "@openauthjs/openauth": "npm:@openauthjs/openauth@^0.4.3",
+        "fresh": "jsr:@fresh/core@^2.0.0-alpha.34",
+        "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.7",
+        "preact": "npm:preact@^10.26.7",
+        "preact/jsx-runtime": "npm:preact@^10.26.7/jsx-runtime",
+        "@preact/signals": "npm:@preact/signals@^2.0.4",
+        "tailwindcss": "npm:tailwindcss@^3.4.3"
     },
+    "nodeModulesDir": "auto",
     "fmt": {
         "useTabs": false,
         "lineWidth": 80,
@@ -15,12 +37,27 @@
         "semiColons": false,
         "singleQuote": false,
         "proseWrap": "preserve",
-        "include": ["src/"],
+        "include": ["./**/*.tsx"],
         "exclude": ["src/testdata/", "src/fixtures/**/*.ts"]
     },
     "unstable": ["kv"],
     "compilerOptions": {
+        "lib": [
+            "dom",
+            "dom.asynciterable",
+            "dom.iterable",
+            "deno.ns",
+            "deno.unstable"
+        ],
         "jsx": "precompile",
-        "jsxImportSource": "hono/jsx"
+        "jsxImportSource": "preact",
+        "jsxPrecompileSkipElements": [
+            "a",
+            "img",
+            "source",
+            "body",
+            "html",
+            "head"
+        ]
     }
 }

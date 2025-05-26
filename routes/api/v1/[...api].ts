@@ -2,27 +2,24 @@ import { Hono } from "hono"
 import { secureHeaders } from "hono/secure-headers"
 import { trimTrailingSlash } from "hono/trailing-slash"
 import { createMiddleware } from "hono/factory"
+import { showRoutes } from "hono/dev"
 import type {
     ExchangeError,
     ExchangeSuccess,
 } from "@openauthjs/openauth/client"
-import bookmarks from "./api/bookmarks.ts"
-import type { Variables } from "./globals.ts"
-import { client, isAuthenticated, setTokens } from "./utils/auth.ts"
-
-import denoJson from "../deno.json" with { type: "json" }
+import bookmarks from "./(_routes)/bookmarks.ts"
+import type { Variables } from "@/utils/globals.ts"
+import { client, isAuthenticated, setTokens } from "@/utils/auth.ts"
+import { define } from "@/utils/fresh.ts"
 
 const unprotectedRoutes = new Hono()
-    .get("/", async (ctx) => {
-        return await Promise.resolve(ctx.json({
-            message: "Hello World!",
-            version: denoJson.version,
-        }))
+    .get("/test", async (ctx) => {
+        return await ctx.text("Hello, World!")
     })
     .get("/auth/authorize", async (ctx) => {
         const origin = new URL(ctx.req.url).origin
         const { url } = await client.authorize(
-            origin + "/auth/callback",
+            origin + "/api/v1/auth/callback",
             "code",
         )
         return ctx.redirect(url, 302)
@@ -31,7 +28,7 @@ const unprotectedRoutes = new Hono()
         const url = new URL(ctx.req.url)
         const code = ctx.req.query("code")
         const error = ctx.req.query("error")
-        const next = ctx.req.query("next") ?? `${url.origin}/`
+        const next = ctx.req.query("next") ?? `${url.origin}/home`
 
         if (error) {
             console.debug(
@@ -59,7 +56,7 @@ const unprotectedRoutes = new Hono()
         try {
             exchanged = await client.exchange(
                 code,
-                `${url.origin}/auth/callback`,
+                `${url.origin}/api/v1/auth/callback`,
             )
         } catch (error) {
             console.error(
@@ -115,6 +112,7 @@ const protectedRoutes = new Hono<Variables>()
     .route("/bookmarks", bookmarks)
 
 const app = new Hono<Variables>()
+    .basePath("/api/v1")
     .use(trimTrailingSlash())
     // TODO(@finxol): fix security headers
     .use(
@@ -127,4 +125,8 @@ const app = new Hono<Variables>()
     .route("/", unprotectedRoutes)
     .route("/", protectedRoutes)
 
-Deno.serve({ port: parseInt(Deno.env.get("PORT") || "8000") }, app.fetch)
+showRoutes(app, { verbose: true })
+
+export const handler = define.handlers(async (ctx) => {
+    return await app.fetch(ctx.req)
+})

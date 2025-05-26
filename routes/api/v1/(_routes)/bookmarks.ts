@@ -4,8 +4,10 @@ import { URLSchema } from "@/utils/bookmarks.ts"
 import { TidyURL } from "tidy-url"
 import { encodeHex } from "@std/encoding/hex"
 import { parse } from "node-html-parser"
-import type { Variables } from "../globals.ts"
-import { getUserSub } from "../utils/auth.ts"
+import type { Variables } from "@/utils/globals.ts"
+import { getUserSub } from "@/utils/auth.ts"
+import { tryCatch } from "@/utils/utils.ts"
+import { ofetch } from "ofetch"
 
 const app = new Hono<Variables>()
     .delete("/all", async (c) => {
@@ -25,7 +27,7 @@ const app = new Hono<Variables>()
         for await (const item of it) {
             await kv.delete(item.key)
         }
-        return c.json({ message: "Bookmarks deleted" })
+        return c.text("Bookmarks deleted!")
     })
     .get("/all", async (c) => {
         const subject = getUserSub(c)
@@ -77,8 +79,13 @@ const app = new Hono<Variables>()
         const hashBuffer = await crypto.subtle.digest("SHA-256", data)
         const id = encodeHex(hashBuffer)
 
-        const page = await fetch(cleanUrl).then((response) => response.text())
-        const parsedPage = parse(page)
+        const page = await tryCatch(ofetch(cleanUrl))
+        if (!page.success) {
+            console.error("Error fetching URL:", page.error)
+            return c.json({ error: "Invalid URL" }, 400)
+        }
+
+        const parsedPage = parse(page.value)
 
         const title = parsedPage.querySelector("title")?.textContent ||
             parsedPage.querySelector("meta[property='og:title']")?.getAttribute(

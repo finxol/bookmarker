@@ -2,12 +2,12 @@ import { createClient, type Tokens } from "@openauthjs/openauth/client"
 import { createSubjects } from "@openauthjs/openauth/subject"
 import type { Context } from "hono"
 import { deleteCookie, getCookie, setCookie } from "hono/cookie"
-import { user, type UserSubject } from "../globals.ts"
+import { user, type UserSubject } from "./globals.ts"
 
 const clientID = Deno.env.get("AUTH_CLIENT_ID")
 const issuerUrl = Deno.env.get("AUTH_ISSUER_URL")
 
-const subjects = createSubjects({
+export const subjects = createSubjects({
     user,
 })
 

@@ -1,0 +1,44 @@
+{
+    "lsp": {
+        "deno": {
+            "settings": {
+                "deno": {
+                    "enable": true
+                }
+            }
+        }
+    },
+    "language_servers": ["!biome"],
+    "languages": {
+        "TypeScript": {
+            "language_servers": [
+                "deno",
+                "!typescript-language-server",
+                "!vtsls",
+                "!eslint",
+                "!biome"
+            ],
+            "formatter": "language_server"
+        },
+        "TSX": {
+            "language_servers": [
+                "deno",
+                "!typescript-language-server",
+                "!vtsls",
+                "!eslint",
+                "!biome"
+            ],
+            "formatter": "language_server"
+        },
+        "JavaScript": {
+            "language_servers": [
+                "deno",
+                "!typescript-language-server",
+                "!vtsls",
+                "!eslint",
+                "!biome"
+            ],
+            "formatter": "language_server"
+        }
+    }
+}
