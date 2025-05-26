@@ -3,19 +3,20 @@ import { createSubjects } from "@openauthjs/openauth/subject"
 import type { Context } from "hono"
 import { deleteCookie, getCookie, setCookie } from "hono/cookie"
 import { user, type UserSubject } from "./globals.ts"
+import { isCI } from "std-env"
 
-const clientID = Deno.env.get("AUTH_CLIENT_ID")
-const issuerUrl = Deno.env.get("AUTH_ISSUER_URL")
+const clientID = Deno.env.get("AUTH_CLIENT_ID")!
+const issuerUrl = Deno.env.get("AUTH_ISSUER_URL")!
 
 export const subjects = createSubjects({
     user,
 })
 
-if (!clientID) {
+if (!isCI && !clientID) {
     throw new Error("AUTH_CLIENT_ID environment variable is not set")
 }
 
-if (!issuerUrl) {
+if (!isCI && !issuerUrl) {
     throw new Error("AUTH_ISSUER_URL environment variable is not set")
 }
 
