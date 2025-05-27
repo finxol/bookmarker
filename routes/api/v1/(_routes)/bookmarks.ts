@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { kv } from "@/utils/kv.ts"
-import { URLSchema } from "@/utils/bookmarks.ts"
+import { Bookmark, BookmarkSchema, URLSchema } from "@/utils/bookmarks.ts"
 import { TidyURL } from "tidy-url"
 import { encodeHex } from "@std/encoding/hex"
 import { parse } from "node-html-parser"
@@ -68,11 +68,14 @@ const app = new Hono<Variables>()
             )
         }
 
-        const it = kv.list({ prefix: ["bookmarks", subject.id] })
+        const it = kv.list<Bookmark>({ prefix: ["bookmarks", subject.id] })
 
         const bookmarks = []
         for await (const item of it) {
-            bookmarks.push(item.value)
+            bookmarks.push({
+                id: item.key.at(-1),
+                ...item.value
+            })
         }
 
         return c.json(bookmarks)
@@ -135,12 +138,19 @@ const app = new Hono<Variables>()
 
         console.log(title, description)
 
-        await kv.set(["bookmarks", subject.id, id], {
+        const bookmark = BookmarkSchema.safeParse({
             title,
             description,
             url: cleanUrl,
             updatedAt: new Date().toISOString(),
         })
+
+        if (!bookmark.success) {
+            console.error("Error parsing bookmark:", bookmark.error)
+            return c.json({ error: "Invalid bookmark" }, 400)
+        }
+
+        await kv.set(["bookmarks", subject.id, id], bookmark.data)
 
         return c.json({ id })
     })

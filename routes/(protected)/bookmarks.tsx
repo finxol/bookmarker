@@ -9,7 +9,10 @@ export default async function Home(ctx: FreshContext<State>) {
 
     const bookmarks = []
     for await (const item of it) {
-        bookmarks.push(BookmarkSchema.parse(item.value))
+        bookmarks.push({
+            ...BookmarkSchema.parse(item.value),
+            id: item.key.at(-1),
+        })
     }
 
     return (
@@ -27,6 +30,7 @@ export default async function Home(ctx: FreshContext<State>) {
                                 rel="noopener noreferrer"
                                 className="flex flex-col items-start justify-start *:px-4 *:py-2 *:w-full h-min border border-gray-200 rounded-md w-fit max-w-96"
                                 key={bookmark.url}
+                                id={String(bookmark.id)}
                             >
                                 {bookmark.title &&
                                     (
