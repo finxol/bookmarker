@@ -6,9 +6,8 @@ import {
 } from "@std/http/cookie"
 import { client, subjects } from "@/utils/auth.ts"
 
-async function freshIsAuthenticated(ctx: FreshContext | FreshContext["req"]) {
-    //@ts-expect-error: this works
-    const req = ctx.req || ctx
+export async function freshIsAuthenticated(ctx: FreshContext) {
+    const req = ctx.req
     const cookies = getCookiesFresh(req.headers)
     const accessToken = cookies.access_token
     const refreshToken = cookies.refresh_token

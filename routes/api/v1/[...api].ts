@@ -107,9 +107,8 @@ const unprotectedRoutes = new Hono()
 
         if (exchanged.err) {
             console.debug(
-                `AUTH CALLBACK: Error exchanging code - ${
-                    JSON.stringify(exchanged.err)
-                }`,
+                "AUTH CALLBACK: Error exchanging code —",
+                exchanged.err
             )
 
             if (isMobile && redirectUri) {
