@@ -10,6 +10,33 @@ import { tryCatch } from "@/utils/utils.ts"
 import { ofetch } from "ofetch"
 
 const app = new Hono<Variables>()
+    .delete("/:id", async (c) => {
+        const subject = getUserSub(c)
+
+        if (!subject) {
+            return c.json(
+                {
+                    message: "User subject missing in context",
+                },
+                500,
+            )
+        }
+
+        const id = c.req.param("id")
+
+        if (!id) {
+            return c.json(
+                {
+                    message: "ID parameter missing in request",
+                },
+                400,
+            )
+        }
+
+        const key = ["bookmarks", subject.id, id]
+        await kv.delete(key)
+        return c.text("Bookmark deleted!")
+    })
     .delete("/all", async (c) => {
         const subject = getUserSub(c)
 
