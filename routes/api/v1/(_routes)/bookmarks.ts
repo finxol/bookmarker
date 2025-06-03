@@ -92,7 +92,9 @@ const app = new Hono<Variables>()
             )
         }
 
-        const url = c.req.query("url")
+        const urlParam = c.req.query("url")
+        const urlBody = (await c.req.parseBody()).url
+        const url = urlParam || urlBody
         if (!url) {
             return c.json({ error: "Missing URL parameter" }, 400)
         }
@@ -117,7 +119,7 @@ const app = new Hono<Variables>()
 
         const parsedPage = parse(page.value)
 
-        const title = parsedPage.querySelector("title")?.textContent ||
+        const title = (parsedPage.querySelector("title")?.textContent ||
             parsedPage.querySelector("meta[property='og:title']")?.getAttribute(
                 "content",
             ) ||
@@ -125,16 +127,16 @@ const app = new Hono<Variables>()
                 ?.getAttribute(
                     "content",
                 ) ||
-            cleanUrl
+            cleanUrl).trim().substring(0, 200)
         const description =
-            parsedPage.querySelector("meta[name='description']")?.getAttribute(
+            (parsedPage.querySelector("meta[name='description']")?.getAttribute(
                 "content",
             ) ||
             parsedPage.querySelector("meta[property='og:description']")
                 ?.getAttribute("content") ||
             parsedPage.querySelector("meta[name='twitter:description']")
                 ?.getAttribute("content") ||
-            ""
+            "").trim().substring(0, 500)
 
         console.log(title, description)
 
