@@ -17,33 +17,75 @@ export default function App(
                 />
                 <title>Bookmarker</title>
                 <link rel="stylesheet" href="/styles.css" />
-                <script src="/htmx.org@2.0.4"></script>
             </head>
-            <body>
-                <div className="grid h-screen grid-cols-1 grid-rows-[auto_1fr] gap-4">
-                    <header className="sticky top-0 z-50 w-full bg-green-500 px-2 h-24 mx-auto flex flex-row items-center justify-between p-2">
-                        <div className="flow-inline flex flex-row items-center justify-end">
-                            <a
-                                href={user ? "/home" : "/"}
-                                className="flex flex-row items-center justify-start gap-4 ml-4 mr-8 text-xl font-bold"
-                            >
-                                Bookmarker
-                            </a>
-                            <nav className="flex flex-row items-center justify-end gap-4">
-                                {user
-                                    ? <a href="/bookmarks">Bookmarks</a>
-                                    : <a href="/login">Get Started</a>}
-                            </nav>
-                        </div>
-                        {user && (
-                            <div className="flex flex-row items-center justify-end gap-4">
-                                <nav className="flex flex-row items-center justify-end gap-4">
-                                    <LoginAccount isAuthed={user} />
-                                </nav>
+            <body className="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen">
+                <div className="min-h-screen flex flex-col">
+                    <header className="sticky top-0 z-50 w-full bg-purple-600 shadow-lg">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center space-x-8">
+                                    <a
+                                        href={user ? "/home" : "/"}
+                                        className="flex items-center space-x-2 text-2xl font-bold text-white hover:text-yellow-300 transition-colors duration-200"
+                                    >
+                                        <span className="text-yellow-400">
+                                            📚
+                                        </span>
+                                        <span>Bookmarker</span>
+                                    </a>
+                                    <nav className="hidden md:flex items-center space-x-6">
+                                        {user
+                                            ? (
+                                                <a
+                                                    href="/new"
+                                                    className="bg-white text-purple-600 px-4 py-2 rounded-lg hover:bg-purple-50 hover:text-purple-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 border border-purple-200"
+                                                >
+                                                    New Bookmark
+                                                </a>
+                                            )
+                                            : (
+                                                <a
+                                                    href="/login"
+                                                    className="bg-white text-purple-600 px-4 py-2 rounded-lg hover:bg-purple-50 hover:text-purple-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 border border-purple-200"
+                                                >
+                                                    Get Started
+                                                </a>
+                                            )}
+                                    </nav>
+                                </div>
+                                {user && (
+                                    <div className="flex items-center space-x-4">
+                                        <nav className="flex items-center space-x-4">
+                                            <LoginAccount isAuthed={user} />
+                                        </nav>
+                                    </div>
+                                )}
+                                {/* Mobile menu for smaller screens */}
+                                <div className="md:hidden">
+                                    <nav className="flex items-center space-x-4">
+                                        {user
+                                            ? (
+                                                <a
+                                                    href="/new"
+                                                    className="bg-white text-purple-600 px-3 py-2 rounded-lg hover:bg-purple-50 hover:text-purple-700 transition-all duration-200 text-sm font-medium shadow-md border border-purple-200"
+                                                >
+                                                    New
+                                                </a>
+                                            )
+                                            : (
+                                                <a
+                                                    href="/login"
+                                                    className="bg-white text-purple-600 px-3 py-2 rounded-lg hover:bg-purple-50 hover:text-purple-700 transition-all duration-200 text-sm font-medium shadow-md border border-purple-200"
+                                                >
+                                                    Start
+                                                </a>
+                                            )}
+                                    </nav>
+                                </div>
                             </div>
-                        )}
+                        </div>
                     </header>
-                    <main className="content-grid">
+                    <main className="flex-1 overflow-auto">
                         <Component />
                     </main>
                 </div>
