@@ -127,7 +127,7 @@ const app = new Hono<Variables>()
                 ?.getAttribute(
                     "content",
                 ) ||
-            cleanUrl).trim().substring(0, 200)
+            cleanUrl).trim()
         const description =
             (parsedPage.querySelector("meta[name='description']")?.getAttribute(
                 "content",
@@ -136,13 +136,13 @@ const app = new Hono<Variables>()
                 ?.getAttribute("content") ||
             parsedPage.querySelector("meta[name='twitter:description']")
                 ?.getAttribute("content") ||
-            "").trim().substring(0, 500)
+            "").trim()
 
         console.log(title, description)
 
         const bookmark = BookmarkSchema.safeParse({
-            title,
-            description,
+            title: title.length > 100 ? title.substring(0, 97) + "..." : title,
+            description: description.length > 300 ? description.substring(0, 297) + "..." : description,
             url: cleanUrl,
             updatedAt: new Date().toISOString(),
         })
