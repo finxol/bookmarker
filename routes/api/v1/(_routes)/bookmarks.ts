@@ -9,6 +9,43 @@ import { getUserSub } from "@/utils/auth.ts"
 import { tryCatch } from "@/utils/utils.ts"
 import { ofetch } from "ofetch"
 
+async function getMeta(cleanUrl: string): Promise<{ title: string; description: string }> {
+    const page = await tryCatch(ofetch(cleanUrl))
+    if (!page.success) {
+        console.error("Error fetching URL:", page.error)
+        return {
+            title: cleanUrl.split("/").at(-1) || cleanUrl,
+            description: cleanUrl,
+        }
+    }
+
+    const parsedPage = parse(page.value)
+
+    const title = (parsedPage.querySelector("title")?.textContent ||
+        parsedPage.querySelector("meta[property='og:title']")?.getAttribute(
+            "content",
+        ) ||
+        parsedPage.querySelector("meta[property='twitter:title']")
+            ?.getAttribute(
+                "content",
+            ) ||
+        cleanUrl).trim()
+    const description =
+        (parsedPage.querySelector("meta[name='description']")?.getAttribute(
+            "content",
+        ) ||
+        parsedPage.querySelector("meta[property='og:description']")
+            ?.getAttribute("content") ||
+        parsedPage.querySelector("meta[name='twitter:description']")
+            ?.getAttribute("content") ||
+        "").trim()
+
+    return {
+        title,
+        description,
+    }
+}
+
 const app = new Hono<Variables>()
     .delete("/:id", async (c) => {
         const subject = getUserSub(c)
@@ -111,32 +148,7 @@ const app = new Hono<Variables>()
         const hashBuffer = await crypto.subtle.digest("SHA-256", data)
         const id = encodeHex(hashBuffer)
 
-        const page = await tryCatch(ofetch(cleanUrl))
-        if (!page.success) {
-            console.error("Error fetching URL:", page.error)
-            return c.json({ error: "Invalid URL" }, 400)
-        }
-
-        const parsedPage = parse(page.value)
-
-        const title = (parsedPage.querySelector("title")?.textContent ||
-            parsedPage.querySelector("meta[property='og:title']")?.getAttribute(
-                "content",
-            ) ||
-            parsedPage.querySelector("meta[property='twitter:title']")
-                ?.getAttribute(
-                    "content",
-                ) ||
-            cleanUrl).trim()
-        const description =
-            (parsedPage.querySelector("meta[name='description']")?.getAttribute(
-                "content",
-            ) ||
-            parsedPage.querySelector("meta[property='og:description']")
-                ?.getAttribute("content") ||
-            parsedPage.querySelector("meta[name='twitter:description']")
-                ?.getAttribute("content") ||
-            "").trim()
+        const { title, description } = await getMeta(cleanUrl)
 
         console.log(title, description)
 
