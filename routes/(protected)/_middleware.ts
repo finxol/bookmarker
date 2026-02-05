@@ -1,16 +1,16 @@
-import { FreshContext } from "fresh"
+import { Context } from "fresh"
 import { State } from "@/utils/fresh.ts"
-import {
-    deleteCookie as deleteCookieFresh,
-    getCookies as getCookiesFresh,
-} from "@std/http/cookie"
+import { deleteCookie, getCookies } from "@std/http"
 import { client, subjects } from "@/utils/auth.ts"
 
-export async function freshIsAuthenticated(ctx: FreshContext) {
+export async function freshIsAuthenticated(ctx: Context<State>) {
     const req = ctx.req
-    const cookies = getCookiesFresh(req.headers)
+    const cookies = getCookies(req.headers)
     const accessToken = cookies.access_token
     const refreshToken = cookies.refresh_token
+
+    console.log("access_token:", accessToken)
+    console.log("refresh_token:", refreshToken)
 
     if (!accessToken) {
         return false
@@ -22,18 +22,22 @@ export async function freshIsAuthenticated(ctx: FreshContext) {
 
     if (verified.err) {
         console.error("Error verifying token:", verified.err)
-        deleteCookieFresh(req.headers, "access_token")
-        deleteCookieFresh(req.headers, "refresh_token")
+        deleteCookie(req.headers, "access_token")
+        deleteCookie(req.headers, "refresh_token")
+        console.log("Cookies", req.headers)
+
         return false
     }
 
     return verified.subject.properties
 }
 
-export async function handler(ctx: FreshContext<State>) {
+export async function handler(ctx: Context<State>) {
     const user = await freshIsAuthenticated(ctx)
 
     if (!user) {
+        deleteCookie(ctx.req.headers, "access_token")
+        deleteCookie(ctx.req.headers, "refresh_token")
         return ctx.redirect("/login")
     }
 

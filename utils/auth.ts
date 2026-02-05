@@ -67,6 +67,9 @@ export async function isAuthenticated(ctx: Context) {
         console.error("Error verifying token:", verified.err)
         deleteCookie(ctx, "access_token")
         deleteCookie(ctx, "refresh_token")
+
+        console.log("Cookies", ctx.header)
+
         return false
     }
     if (verified.tokens) {

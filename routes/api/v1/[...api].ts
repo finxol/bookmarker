@@ -1,4 +1,4 @@
-import { Hono, Context } from "hono"
+import { Context, Hono } from "hono"
 import { secureHeaders } from "hono/secure-headers"
 import { trimTrailingSlash } from "hono/trailing-slash"
 import { createMiddleware } from "hono/factory"
@@ -22,8 +22,8 @@ function getCallbackUrl(ctx: Context) {
 }
 
 const unprotectedRoutes = new Hono()
-    .get("/test", async (ctx) => {
-        return await ctx.text("Hello, World!")
+    .get("/test", (ctx) => {
+        return ctx.text("Hello, World!")
     })
     .get("/auth/authorize", async (ctx) => {
         const { url } = await client.authorize(getCallbackUrl(ctx), "code")
@@ -36,7 +36,9 @@ const unprotectedRoutes = new Hono()
         const redirectUri = ctx.req.query("redirect_uri")
 
         // Determine if this is a mobile auth flow based on redirect_uri
-        const isMobile = !!(redirectUri && (redirectUri.startsWith('bookmarkerapp://') || redirectUri.startsWith('exp://')))
+        const isMobile = !!(redirectUri &&
+            (redirectUri.startsWith("bookmarkerapp://") ||
+                redirectUri.startsWith("exp://")))
 
         if (error) {
             console.debug(
@@ -45,8 +47,12 @@ const unprotectedRoutes = new Hono()
 
             if (isMobile && redirectUri) {
                 const errorUrl = new URL(redirectUri)
-                errorUrl.searchParams.set('error', error)
-                errorUrl.searchParams.set('error_description', ctx.req.query("error_description") || 'Authentication failed')
+                errorUrl.searchParams.set("error", error)
+                errorUrl.searchParams.set(
+                    "error_description",
+                    ctx.req.query("error_description") ||
+                        "Authentication failed",
+                )
                 return ctx.redirect(errorUrl.toString(), 302)
             }
 
@@ -64,8 +70,8 @@ const unprotectedRoutes = new Hono()
 
             if (isMobile && redirectUri) {
                 const errorUrl = new URL(redirectUri)
-                errorUrl.searchParams.set('error', 'missing_code')
-                errorUrl.searchParams.set('error_description', errorMessage)
+                errorUrl.searchParams.set("error", "missing_code")
+                errorUrl.searchParams.set("error_description", errorMessage)
                 return ctx.redirect(errorUrl.toString(), 302)
             }
 
@@ -91,8 +97,11 @@ const unprotectedRoutes = new Hono()
 
             if (isMobile && redirectUri) {
                 const errorUrl = new URL(redirectUri)
-                errorUrl.searchParams.set('error', 'exchange_failed')
-                errorUrl.searchParams.set('error_description', 'Token exchange failed')
+                errorUrl.searchParams.set("error", "exchange_failed")
+                errorUrl.searchParams.set(
+                    "error_description",
+                    "Token exchange failed",
+                )
                 return ctx.redirect(errorUrl.toString(), 302)
             }
 
@@ -108,32 +117,40 @@ const unprotectedRoutes = new Hono()
         if (exchanged.err) {
             console.debug(
                 "AUTH CALLBACK: Error exchanging code —",
-                exchanged.err
+                exchanged.err,
             )
 
             if (isMobile && redirectUri) {
                 const errorUrl = new URL(redirectUri)
-                errorUrl.searchParams.set('error', 'token_error')
-                errorUrl.searchParams.set('error_description', JSON.stringify(exchanged.err))
+                errorUrl.searchParams.set("error", "token_error")
+                errorUrl.searchParams.set(
+                    "error_description",
+                    JSON.stringify(exchanged.err),
+                )
                 return ctx.redirect(errorUrl.toString(), 302)
             }
 
             return ctx.json(exchanged.err, 400)
         }
 
-        const next = redirectUri ? new URL(redirectUri) : new URL('/home', url.origin)
+        const next = redirectUri
+            ? new URL(redirectUri)
+            : new URL("/home", url.origin)
 
         if (isMobile && redirectUri) {
             // For mobile apps, redirect to the app with tokens as query parameters
-            next.searchParams.set('access_token', exchanged.tokens.access)
+            next.searchParams.set("access_token", exchanged.tokens.access)
             if (exchanged.tokens.refresh) {
-                next.searchParams.set('refresh_token', exchanged.tokens.refresh)
+                next.searchParams.set("refresh_token", exchanged.tokens.refresh)
             }
             if (exchanged.tokens.expiresIn) {
-                next.searchParams.set('expires_in', exchanged.tokens.expiresIn.toString())
+                next.searchParams.set(
+                    "expires_in",
+                    exchanged.tokens.expiresIn.toString(),
+                )
             }
 
-            console.log('Redirecting mobile app to:', next.toString())
+            console.log("Redirecting mobile app to:", next.toString())
         }
 
         setTokens(ctx, exchanged.tokens)

@@ -9,7 +9,9 @@ import { getUserSub } from "@/utils/auth.ts"
 import { tryCatch } from "@/utils/utils.ts"
 import { ofetch } from "ofetch"
 
-async function getMeta(cleanUrl: string): Promise<{ title: string; description: string }> {
+async function getMeta(
+    cleanUrl: string,
+): Promise<{ title: string; description: string }> {
     const page = await tryCatch(ofetch(cleanUrl))
     if (!page.success) {
         console.error("Error fetching URL:", page.error)
@@ -34,11 +36,11 @@ async function getMeta(cleanUrl: string): Promise<{ title: string; description: 
         (parsedPage.querySelector("meta[name='description']")?.getAttribute(
             "content",
         ) ||
-        parsedPage.querySelector("meta[property='og:description']")
-            ?.getAttribute("content") ||
-        parsedPage.querySelector("meta[name='twitter:description']")
-            ?.getAttribute("content") ||
-        "").trim()
+            parsedPage.querySelector("meta[property='og:description']")
+                ?.getAttribute("content") ||
+            parsedPage.querySelector("meta[name='twitter:description']")
+                ?.getAttribute("content") ||
+            "").trim()
 
     return {
         title,
@@ -111,7 +113,7 @@ const app = new Hono<Variables>()
         for await (const item of it) {
             bookmarks.push({
                 id: item.key.at(-1),
-                ...item.value
+                ...item.value,
             })
         }
 
@@ -154,7 +156,9 @@ const app = new Hono<Variables>()
 
         const bookmark = BookmarkSchema.safeParse({
             title: title.length > 100 ? title.substring(0, 97) + "..." : title,
-            description: description.length > 300 ? description.substring(0, 297) + "..." : description,
+            description: description.length > 300
+                ? description.substring(0, 297) + "..."
+                : description,
             url: cleanUrl,
             updatedAt: new Date().toISOString(),
         })
