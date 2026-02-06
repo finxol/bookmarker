@@ -8,6 +8,7 @@ import type { Variables } from "@/utils/globals.ts"
 import { getUserSub } from "@/utils/auth.ts"
 import { tryCatch } from "@/utils/utils.ts"
 import { ofetch } from "ofetch"
+import { z } from "zod/v4-mini"
 
 async function getMeta(
     cleanUrl: string,
@@ -171,6 +172,54 @@ const app = new Hono<Variables>()
         await kv.set(["bookmarks", subject.id, id], bookmark.data)
 
         return c.json({ id })
+    })
+    .post("/import", async (c) => {
+        const subject = getUserSub(c)
+
+        if (!subject) {
+            return c.json(
+                {
+                    message: "User subject missing in context",
+                },
+                500,
+            )
+        }
+
+        const body = await c.req.json()
+        const bookmarks = z.array(BookmarkSchema).safeParse(body.bookmarks)
+
+        if (!bookmarks.success) {
+            return c.json({ error: "Error in Bookmark Schema" }, 400)
+        }
+
+        const promises = bookmarks.data.map(async (bookmark) => {
+            const { title, description, url } = bookmark
+            const encoder = new TextEncoder()
+            const data = encoder.encode(url)
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data)
+            const id = encodeHex(hashBuffer)
+
+            const bookmarkData = BookmarkSchema.safeParse({
+                title: title.length > 100 ? title.substring(0, 97) + "..." : title,
+                description: description.length > 300
+                    ? description.substring(0, 297) + "..."
+                    : description,
+                url,
+                updatedAt: new Date().toISOString(),
+            })
+
+            if (!bookmarkData.success) {
+                console.error("Error parsing bookmark:", bookmarkData.error)
+                return Promise.resolve({ error: "Invalid bookmark" })
+            }
+
+            await kv.set(["bookmarks", subject.id, id], bookmarkData.data)
+
+            return { id }
+        })
+
+        const results = await Promise.allSettled(promises)
+        return c.json(results)
     })
 
 export default app

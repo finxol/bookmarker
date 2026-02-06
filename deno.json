@@ -60,5 +60,9 @@
         "proseWrap": "preserve",
         "include": ["./**/*.tsx"],
         "exclude": ["src/testdata/", "src/fixtures/**/*.ts"]
+    },
+    "deploy": {
+      "org": "finxol",
+      "app": "bookmarker"
     }
 }

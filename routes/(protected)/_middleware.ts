@@ -22,8 +22,6 @@ export async function freshIsAuthenticated(ctx: Context<State>) {
 
     if (verified.err) {
         console.error("Error verifying token:", verified.err)
-        deleteCookie(req.headers, "access_token")
-        deleteCookie(req.headers, "refresh_token")
         console.log("Cookies", req.headers)
 
         return false
